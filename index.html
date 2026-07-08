@@ -1,9 +1,9 @@
-Put your HTML text here<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CYBER DATA CORE - Storage Dashboard</title>
+    <title>CYBER DATA CORE - Storage Dashboard V2</title>
     <style>
         :root {
             --bg-color: #050a05;
@@ -14,6 +14,7 @@ Put your HTML text here<!DOCTYPE html>
             --text-dim: #7fbf7f;
             --border-color: #006622;
             --alert-color: #ff3333;
+            --alert-glow: rgba(255, 51, 51, 0.4);
         }
 
         * {
@@ -98,7 +99,6 @@ Put your HTML text here<!DOCTYPE html>
             text-shadow: 0 0 5px var(--primary-glow);
         }
 
-        /* Progress Bar Styling */
         .progress-container {
             background: rgba(0, 34, 11, 0.5);
             border: 1px solid var(--border-color);
@@ -117,7 +117,6 @@ Put your HTML text here<!DOCTYPE html>
             box-shadow: 0 0 8px var(--primary-glow);
         }
 
-        /* Slide-Lock Controls */
         .lock-status {
             display: inline-block;
             padding: 4px 8px;
@@ -142,27 +141,89 @@ Put your HTML text here<!DOCTYPE html>
 
         .btn {
             background: transparent;
-            border: 1px solid var(--primary-glow);
-            color: var(--primary-glow);
+            border: 1px solid var(--border-color);
+            color: var(--text-dim);
             padding: 8px 15px;
-            cursor: pointer;
+            cursor: not-allowed;
             font-weight: bold;
             text-transform: uppercase;
             transition: all 0.2s;
             margin-top: 10px;
             width: 100%;
+            opacity: 0.5;
         }
 
-        .btn:hover {
+        .btn.active {
+            border: 1px solid var(--primary-glow);
+            color: var(--primary-glow);
+            cursor: pointer;
+            opacity: 1;
+        }
+
+        .btn.active:hover {
             background: var(--primary-glow);
             color: var(--bg-color);
             box-shadow: 0 0 15px var(--primary-glow);
         }
 
-        /* Network Visualizer Canvas */
-        #networkCanvas {
+        /* Mock Terminal Shell Styling */
+        .terminal-shell {
+            background: rgba(0, 15, 5, 0.9);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            font-size: 12px;
+            height: 125px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .terminal-log {
+            overflow-y: hidden;
+            color: var(--text-dim);
+            margin-bottom: 5px;
+            white-space: pre-line;
+            line-height: 1.4;
+        }
+
+        .terminal-input-line {
+            display: flex;
+            align-items: center;
+        }
+
+        .terminal-prompt {
+            color: var(--primary-glow);
+            margin-right: 5px;
+        }
+
+        .terminal-input {
+            background: transparent;
+            border: none;
+            color: var(--primary-glow);
+            font-family: inherit;
+            font-size: inherit;
+            outline: none;
+            flex-grow: 1;
+        }
+
+        /* Multi Graph Layout */
+        .graph-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(45%, 1fr));
+            gap: 20px;
+        }
+
+        .graph-panel h3 {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        canvas {
             width: 100%;
-            height: 150px;
+            height: 120px;
             background: rgba(0, 15, 5, 0.5);
             border: 1px solid var(--border-color);
         }
@@ -203,24 +264,16 @@ Put your HTML text here<!DOCTYPE html>
             </div>
         </div>
 
-        <!-- Hardware & Liquid Cooling Node -->
+        <!-- Mock Security Shell Access -->
         <div class="panel">
-            <h2>Node Diagnostics</h2>
-            <div class="metric-group">
-                <span class="metric-label">CPU Core Temp</span>
-                <span class="metric-value" id="cpuTemp">32.5 °C</span>
-            </div>
-            <div class="metric-group">
-                <span class="metric-label">Pump Flow Rate</span>
-                <span class="metric-value">4.2 L/min</span>
-            </div>
-            <div class="metric-group">
-                <span class="metric-label">Fan Speed</span>
-                <span class="metric-value">680 RPM</span>
-            </div>
-            <div class="metric-group">
-                <span class="metric-label">Network Throughput</span>
-                <span class="metric-value" style="color: var(--primary-glow);">10GbE Link Active</span>
+            <h2>Authentication Shell</h2>
+            <div class="terminal-shell">
+                <div class="terminal-log" id="termLog">Awaiting access credentials...
+                    Type 'help' for commands. Hint: pass is 'root'</div>
+                <div class="terminal-input-line">
+                    <span class="terminal-prompt">GUEST@NODE01:~$</span>
+                    <input type="text" class="terminal-input" id="termInput" autocomplete="off" autofocus />
+                </div>
             </div>
         </div>
 
@@ -232,24 +285,35 @@ Put your HTML text here<!DOCTYPE html>
                 <span id="lockStatus" class="lock-status status-locked">Engaged</span>
             </div>
             <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 10px;">
-                WARNING: Disengaging slide-lock handles spins down arrays for node maintenance/hot-swap removal.
+                WARNING: Unauthorized detach commands will trigger local file system lockdown routines.
             </p>
-            <button class="btn" id="lockBtn" onclick="toggleLock()">Trigger Unit Detach</button>
+            <button class="btn" id="lockBtn" onclick="toggleLock()" disabled>Shell Lock Active</button>
         </div>
     </div>
 
-    <!-- Network Traffic Panel -->
+    <!-- Multi-Channel Replication Traffic -->
     <div class="panel">
-        <h2>Real-Time Replication Traffic</h2>
-        <canvas id="networkCanvas"></canvas>
+        <h2>Real-Time Replication Activity</h2>
+        <div class="graph-container">
+            <div class="graph-panel">
+                <h3>Channel Alpha: NVMe Read Throughput (MB/s)</h3>
+                <canvas id="readCanvas"></canvas>
+            </div>
+            <div class="graph-panel">
+                <h3>Channel Beta: NVMe Write Throughput (MB/s)</h3>
+                <canvas id="writeCanvas"></canvas>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Set dynamic simulated values
+        // System Metrics & State Variables
         const storageTarget = 8.2; 
         const totalStorage = 16.0;
-        
-        // Initialize Progress Bars
+        let isLocked = true;
+        let isAuthenticated = false;
+
+        // Initialize Progress Bars Animation
         setTimeout(() => {
             const percentage = (storageTarget / totalStorage) * 100;
             document.getElementById('storagePool1').style.width = percentage + '%';
@@ -259,88 +323,154 @@ Put your HTML text here<!DOCTYPE html>
         // Dynamic System Clock
         function updateClock() {
             const now = new Date();
-            const timeString = now.toTimeString().split(' ')[0];
-            document.getElementById('timestamp').innerText = `SYS_TIME: ${timeString}`;
+            const timeString = now.toTimeString().split(' ');
+            document.getElementById('timestamp').innerText = `SYS_TIME: ${timeString[0]}`;
         }
         setInterval(updateClock, 1000);
         updateClock();
 
-        // Fluctuating Hardware Temps Simulation
-        setInterval(() => {
-            const baseTemp = 32.5;
-            const variance = (Math.random() * 1.4 - 0.7).toFixed(1);
-            const currentTemp = (parseFloat(baseTemp) + parseFloat(variance)).toFixed(1);
-            document.getElementById('cpuTemp').innerText = `${currentTemp} °C`;
-        }, 3000);
+        // Terminal Interaction Logic
+        const termInput = document.getElementById('termInput');
+        const termLog = document.getElementById('termLog');
+        const lockBtn = document.getElementById('lockBtn');
+
+        termInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const cmd = termInput.value.trim().toLowerCase();
+                termInput.value = '';
+                processCommand(cmd);
+            }
+        });
+
+        function logToTerminal(text) {
+            termLog.innerText += "\n" + text;
+            termLog.scrollTop = termLog.scrollHeight;
+        }
+
+        function processCommand(cmd) {
+            if (!cmd) return;
+            logToTerminal(`> ${cmd}`);
+
+            if (cmd === 'help') {
+                logToTerminal("Available: 'login [password]', 'clear', 'status'");
+            } else if (cmd === 'clear') {
+                termLog.innerText = "Shell buffer cleared.";
+            } else if (cmd === 'status') {
+                logToTerminal(`Auth: ${isAuthenticated ? 'ROOT' : 'UNAUTHORIZED'} | Hardware: ${isLocked ? 'LOCKED' : 'UNLOCKED'}`);
+            } else if (cmd.startsWith('login ')) {
+                const pass = cmd.substring(6).trim();
+                if (pass === 'root') {
+                    isAuthenticated = true;
+                    logToTerminal("ACCESS GRANTED. Root authorization verified.");
+                    logToTerminal("Hardware slide-lock panels now armed.");
+                    document.querySelector('.terminal-prompt').innerText = "ROOT@NODE01:#";
+                    lockBtn.removeAttribute('disabled');
+                    lockBtn.className = "btn active";
+                    lockBtn.innerText = "Trigger Unit Detach";
+                } else {
+                    logToTerminal("ERROR: Invalid access key credential validation failure.");
+                }
+            } else {
+                logToTerminal(`Command '${cmd}' not recognized.`);
+            }
+        }
 
         // Toggle Slide-Lock System state
-        let isLocked = true;
         function toggleLock() {
+            if (!isAuthenticated) return;
             const statusLabel = document.getElementById('lockStatus');
-            const button = document.getElementById('lockBtn');
             
             if (isLocked) {
                 statusLabel.innerText = "Disengaged";
                 statusLabel.className = "lock-status status-unlocked";
-                button.innerText = "Lock Mechanism";
+                lockBtn.innerText = "Lock Mechanism";
+                logToTerminal("[ALERT] Physical structural slide-lock rail disengaged.");
                 isLocked = false;
             } else {
                 statusLabel.innerText = "Engaged";
                 statusLabel.className = "lock-status status-locked";
-                button.innerText = "Trigger Unit Detach";
+                lockBtn.innerText = "Trigger Unit Detach";
+                logToTerminal("[INFO] Structural lock array fully secured.");
                 isLocked = true;
             }
         }
 
-        // Live Simulated Audio/Visual Oscilloscope Line Chart (Canvas-based)
-        const canvas = document.getElementById('networkCanvas');
-        const ctx = canvas.getContext('2d');
+        // Canvas Data Wave Setup (Dual Chart System)
+        const readCanvas = document.getElementById('readCanvas');
+        const writeCanvas = document.getElementById('writeCanvas');
+        const readCtx = readCanvas.getContext('2d');
+        const writeCtx = writeCanvas.getContext('2d');
         
-        // Match canvas layout width natively
-        function resizeCanvas() {
-            canvas.width = canvas.parentElement.clientWidth - 32;
-            canvas.height = 130;
+        function resizeCanvases() {
+            const width = readCanvas.parentElement.clientWidth;
+            readCanvas.width = width;
+            writeCanvas.width = width;
+            readCanvas.height = 120;
+            writeCanvas.height = 120;
         }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        window.addEventListener('resize', resizeCanvases);
+        resizeCanvases();
 
-        let offset = 0;
-        function drawNetworkGraph() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw background grid lines
-            ctx.strokeStyle = 'rgba(0, 102, 34, 0.15)';
+        let readOffset = 0;
+        let writeOffset = 50; 
+
+        function drawGrid(ctx, w, h) {
+            ctx.strokeStyle = 'rgba(0, 102, 34, 0.12)';
             ctx.lineWidth = 1;
-            for(let i = 0; i < canvas.width; i += 40) {
-                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+            for(let i = 0; i < w; i += 30) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, h); ctx.stroke();
             }
-            for(let j = 0; j < canvas.height; j += 30) {
-                ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke();
+            for(let j = 0; j < h; j += 25) {
+                ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(w, j); ctx.stroke();
             }
-
-            // Draw fluctuating data baseline wave
-            ctx.beginPath();
-            ctx.strokeStyle = '#00ff66';
-            ctx.lineWidth = 2;
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = '#00ff66';
-
-            ctx.moveTo(0, canvas.height / 2);
-            for (let x = 0; x < canvas.width; x++) {
-                // Generates cybernetic jagged data waves
-                const wave1 = Math.sin(x * 0.02 + offset) * 20;
-                const wave2 = Math.cos(x * 0.05 - offset) * 10;
-                const noise = Math.sin(x * 0.1 + offset * 2) * (Math.random() * 3);
-                const y = (canvas.height / 2) + wave1 + wave2 + noise;
-                ctx.lineTo(x, y);
-            }
-            ctx.stroke();
-            ctx.shadowBlur = 0; // reset shadow glow
-            
-            offset += 0.05;
-            requestAnimationFrame(drawNetworkGraph);
         }
-        drawNetworkGraph();
+
+        function renderGraphs() {
+            // Channel Alpha - Read Waves
+            readCtx.clearRect(0, 0, readCanvas.width, readCanvas.height);
+            drawGrid(readCtx, readCanvas.width, readCanvas.height);
+            readCtx.beginPath();
+            readCtx.strokeStyle = '#00ff66';
+            readCtx.lineWidth = 2;
+            readCtx.shadowBlur = 6;
+            readCtx.shadowColor = '#00ff66';
+            readCtx.moveTo(0, readCanvas.height / 2);
+            
+            for (let x = 0; x < readCanvas.width; x++) {
+                const w1 = Math.sin(x * 0.015 + readOffset) * 25;
+                const w2 = Math.cos(x * 0.04 - readOffset) * 8;
+                const jitter = Math.sin(x * 0.2 + readOffset * 3) * (Math.random() * 2);
+                const y = (readCanvas.height / 2) + w1 + w2 + jitter;
+                readCtx.lineTo(x, y);
+            }
+            readCtx.stroke();
+            readCtx.shadowBlur = 0;
+
+            // Channel Beta - Write Waves (More jagged, ice blue)
+            writeCtx.clearRect(0, 0, writeCanvas.width, writeCanvas.height);
+            drawGrid(writeCtx, writeCanvas.width, writeCanvas.height);
+            writeCtx.beginPath();
+            writeCtx.strokeStyle = '#00ccff'; 
+            writeCtx.lineWidth = 2;
+            writeCtx.shadowBlur = 6;
+            writeCtx.shadowColor = '#00ccff';
+            writeCtx.moveTo(0, writeCanvas.height / 2);
+            
+            for (let x = 0; x < writeCanvas.width; x++) {
+                const w1 = Math.sin(x * 0.03 + writeOffset) * 15;
+                const w2 = Math.sin(x * 0.07 + writeOffset * 1.5) * 12;
+                const spike = (x % 80 === 0) ? (Math.random() * -30) : 0; 
+                const y = (writeCanvas.height / 2) + w1 + w2 + spike;
+                writeCtx.lineTo(x, y);
+            }
+            writeCtx.stroke();
+            writeCtx.shadowBlur = 0;
+
+            readOffset += 0.04;
+            writeOffset += 0.06;
+            requestAnimationFrame(renderGraphs);
+        }
+        renderGraphs();
     </script>
 </body>
 </html>
