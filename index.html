@@ -1,0 +1,346 @@
+Put your HTML text here<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER DATA CORE - Storage Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #050a05;
+            --panel-bg: rgba(10, 25, 10, 0.6);
+            --primary-glow: #00ff66;
+            --secondary-glow: #00cc55;
+            --text-color: #d0ffd0;
+            --text-dim: #7fbf7f;
+            --border-color: #006622;
+            --alert-color: #ff3333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(rgba(18, 40, 18, 0.05) 50%, transparent 50%),
+                linear-gradient(90deg, rgba(18, 40, 18, 0.05) 50%, transparent 50%);
+            background-size: 100% 4px, 4px 100%;
+        }
+
+        .header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            text-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            letter-spacing: 2px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 15px;
+            box-shadow: inset 0 0 15px rgba(0, 255, 102, 0.05);
+            position: relative;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 4px;
+            background: var(--primary-glow);
+        }
+
+        .panel h2 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            color: var(--primary-glow);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .metric-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .metric-label {
+            color: var(--text-dim);
+        }
+
+        .metric-value {
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--primary-glow);
+        }
+
+        /* Progress Bar Styling */
+        .progress-container {
+            background: rgba(0, 34, 11, 0.5);
+            border: 1px solid var(--border-color);
+            height: 12px;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-glow);
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+            box-shadow: 0 0 8px var(--primary-glow);
+        }
+
+        /* Slide-Lock Controls */
+        .lock-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .status-locked {
+            background: rgba(0, 255, 102, 0.2);
+            border: 1px solid var(--primary-glow);
+            color: var(--primary-glow);
+        }
+
+        .status-unlocked {
+            background: rgba(255, 51, 51, 0.2);
+            border: 1px solid var(--alert-color);
+            color: var(--alert-color);
+            text-shadow: 0 0 5px var(--alert-color);
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid var(--primary-glow);
+            color: var(--primary-glow);
+            padding: 8px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            margin-top: 10px;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: var(--primary-glow);
+            color: var(--bg-color);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        /* Network Visualizer Canvas */
+        #networkCanvas {
+            width: 100%;
+            height: 150px;
+            background: rgba(0, 15, 5, 0.5);
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>
+            <h1>CYBER DATA CORE</h1>
+            <p style="color: var(--text-dim); font-size: 11px;">ENTERPRISE SCALED NODE // UNIT-01</p>
+        </div>
+        <div id="timestamp" style="font-size: 13px;">SYS_TIME: --:--:--</div>
+    </div>
+
+    <div class="grid">
+        <!-- Storage Pool Panel -->
+        <div class="panel">
+            <h2>Storage Pool Overview</h2>
+            <div class="metric-group">
+                <span class="metric-label">Array Status</span>
+                <span class="metric-value" style="color: var(--primary-glow);">ONLINE</span>
+            </div>
+            <div class="metric-group">
+                <span class="metric-label">Storage Pool 1</span>
+                <span class="metric-value" id="storageText">0.0 TB / 16.0 TB</span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="storagePool1"></div>
+            </div>
+            <div class="metric-group">
+                <span class="metric-label">Active NVMe Slots</span>
+                <span class="metric-value">8 / 8 Units</span>
+            </div>
+            <div class="metric-group">
+                <span class="metric-label">Array Type</span>
+                <span class="metric-value">RAID 10 (Striped Mirror)</span>
+            </div>
+        </div>
+
+        <!-- Hardware & Liquid Cooling Node -->
+        <div class="panel">
+            <h2>Node Diagnostics</h2>
+            <div class="metric-group">
+                <span class="metric-label">CPU Core Temp</span>
+                <span class="metric-value" id="cpuTemp">32.5 °C</span>
+            </div>
+            <div class="metric-group">
+                <span class="metric-label">Pump Flow Rate</span>
+                <span class="metric-value">4.2 L/min</span>
+            </div>
+            <div class="metric-group">
+                <span class="metric-label">Fan Speed</span>
+                <span class="metric-value">680 RPM</span>
+            </div>
+            <div class="metric-group">
+                <span class="metric-label">Network Throughput</span>
+                <span class="metric-value" style="color: var(--primary-glow);">10GbE Link Active</span>
+            </div>
+        </div>
+
+        <!-- Hardware Slide-Lock Control Panel -->
+        <div class="panel">
+            <h2>Unit Slide-Lock System</h2>
+            <div class="metric-group" style="align-items: center; margin-bottom: 20px;">
+                <span class="metric-label">Physical Lock Status</span>
+                <span id="lockStatus" class="lock-status status-locked">Engaged</span>
+            </div>
+            <p style="font-size: 11px; color: var(--text-dim); margin-bottom: 10px;">
+                WARNING: Disengaging slide-lock handles spins down arrays for node maintenance/hot-swap removal.
+            </p>
+            <button class="btn" id="lockBtn" onclick="toggleLock()">Trigger Unit Detach</button>
+        </div>
+    </div>
+
+    <!-- Network Traffic Panel -->
+    <div class="panel">
+        <h2>Real-Time Replication Traffic</h2>
+        <canvas id="networkCanvas"></canvas>
+    </div>
+
+    <script>
+        // Set dynamic simulated values
+        const storageTarget = 8.2; 
+        const totalStorage = 16.0;
+        
+        // Initialize Progress Bars
+        setTimeout(() => {
+            const percentage = (storageTarget / totalStorage) * 100;
+            document.getElementById('storagePool1').style.width = percentage + '%';
+            document.getElementById('storageText').innerText = `${storageTarget} TB / ${totalStorage} TB (${Math.round(percentage)}%)`;
+        }, 300);
+
+        // Dynamic System Clock
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toTimeString().split(' ')[0];
+            document.getElementById('timestamp').innerText = `SYS_TIME: ${timeString}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Fluctuating Hardware Temps Simulation
+        setInterval(() => {
+            const baseTemp = 32.5;
+            const variance = (Math.random() * 1.4 - 0.7).toFixed(1);
+            const currentTemp = (parseFloat(baseTemp) + parseFloat(variance)).toFixed(1);
+            document.getElementById('cpuTemp').innerText = `${currentTemp} °C`;
+        }, 3000);
+
+        // Toggle Slide-Lock System state
+        let isLocked = true;
+        function toggleLock() {
+            const statusLabel = document.getElementById('lockStatus');
+            const button = document.getElementById('lockBtn');
+            
+            if (isLocked) {
+                statusLabel.innerText = "Disengaged";
+                statusLabel.className = "lock-status status-unlocked";
+                button.innerText = "Lock Mechanism";
+                isLocked = false;
+            } else {
+                statusLabel.innerText = "Engaged";
+                statusLabel.className = "lock-status status-locked";
+                button.innerText = "Trigger Unit Detach";
+                isLocked = true;
+            }
+        }
+
+        // Live Simulated Audio/Visual Oscilloscope Line Chart (Canvas-based)
+        const canvas = document.getElementById('networkCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Match canvas layout width natively
+        function resizeCanvas() {
+            canvas.width = canvas.parentElement.clientWidth - 32;
+            canvas.height = 130;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        let offset = 0;
+        function drawNetworkGraph() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw background grid lines
+            ctx.strokeStyle = 'rgba(0, 102, 34, 0.15)';
+            ctx.lineWidth = 1;
+            for(let i = 0; i < canvas.width; i += 40) {
+                ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+            }
+            for(let j = 0; j < canvas.height; j += 30) {
+                ctx.beginPath(); ctx.moveTo(0, j); ctx.lineTo(canvas.width, j); ctx.stroke();
+            }
+
+            // Draw fluctuating data baseline wave
+            ctx.beginPath();
+            ctx.strokeStyle = '#00ff66';
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = '#00ff66';
+
+            ctx.moveTo(0, canvas.height / 2);
+            for (let x = 0; x < canvas.width; x++) {
+                // Generates cybernetic jagged data waves
+                const wave1 = Math.sin(x * 0.02 + offset) * 20;
+                const wave2 = Math.cos(x * 0.05 - offset) * 10;
+                const noise = Math.sin(x * 0.1 + offset * 2) * (Math.random() * 3);
+                const y = (canvas.height / 2) + wave1 + wave2 + noise;
+                ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.shadowBlur = 0; // reset shadow glow
+            
+            offset += 0.05;
+            requestAnimationFrame(drawNetworkGraph);
+        }
+        drawNetworkGraph();
+    </script>
+</body>
+</html>
