@@ -1,0 +1,453 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER DATA CORE - Automated Evidence Drop Box Matrix</title>
+    <style>
+        :root {
+            --bg-color: #050a05;
+            --panel-bg: rgba(10, 25, 10, 0.6);
+            --primary-glow: #00ff66;
+            --secondary-glow: #00cc55;
+            --text-color: #d0ffd0;
+            --text-dim: #7fbf7f;
+            --text-muted: #4e7c4e;
+            --border-color: #006622;
+            --alert-color: #ff3333;
+            --accent-blue: #00ccff;
+            --accent-amber: #ffb000;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(rgba(18, 40, 18, 0.05) 50%, transparent 50%),
+                linear-gradient(90deg, rgba(18, 40, 18, 0.05) 50%, transparent 50%);
+            background-size: 100% 4px, 4px 100%;
+        }
+
+        .ui-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 15px;
+            box-shadow: inset 0 0 15px rgba(0, 255, 102, 0.05);
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .ui-card::before {
+            content: '';
+            position: absolute;
+            top: -1px; left: -1px; width: 6px; height: 6px;
+            background: var(--primary-glow);
+            box-shadow: 0 0 8px var(--primary-glow);
+        }
+
+        .panel-heading {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            color: var(--primary-glow);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Combined Split Grid System for Drop Zone and Table */
+        .master-box-layout {
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 20px;
+        }
+
+        .storage-grid-layout {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .directory-tree-box {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .dir-node-item {
+            font-size: 12px;
+            padding: 6px 10px;
+            cursor: pointer;
+            border: 1px solid transparent;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        .dir-node-item:hover, .dir-node-item.active {
+            border-color: var(--border-color);
+            background: rgba(0, 255, 102, 0.05);
+            color: var(--primary-glow);
+            text-shadow: 0 0 5px var(--primary-glow);
+        }
+
+        /* Drop Zone Drag-and-Drop Chassis Components */
+        .drop-zone-chassis {
+            border: 2px dashed var(--border-color);
+            border-radius: 4px;
+            padding: 20px 10px;
+            text-align: center;
+            background: rgba(0, 15, 5, 0.6);
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .drop-zone-chassis:hover {
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 12px rgba(0, 255, 102, 0.15);
+        }
+
+        .image-preview-frame {
+            border: 1px solid var(--border-color);
+            background: #000;
+            padding: 5px;
+            width: 100%;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-top: 15px;
+        }
+
+        .image-preview-frame img {
+            max-width: 100%;
+            max-height: 100%;
+            object-contain: contain;
+            opacity: 0.85;
+        }
+
+        /* Tabular Data Matrix Readouts */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+            text-align: left;
+        }
+
+        .data-table th {
+            border-bottom: 2px solid var(--border-color);
+            padding: 8px;
+            color: var(--primary-glow);
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        .data-table td {
+            border-bottom: 1px solid rgba(0, 102, 34, 0.2);
+            padding: 10px 8px;
+            word-break: break-all;
+        }
+
+        .btn-submit {
+            background: transparent;
+            border: 1px solid var(--primary-glow);
+            color: var(--primary-glow);
+            padding: 10px;
+            width: 100%;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 15px;
+            font-family: inherit;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-glow);
+            color: var(--bg-color);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .badge-type {
+            padding: 2px 6px;
+            border-radius: 2px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- SYSTEM FILE VOLUMETRICS RUNTIME HEADERS STRIP -->
+    <div class="ui-card" style="padding: 10px 15px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-weight: bold; text-transform: uppercase; font-size: 11px;">
+            ● CBOS Local Storage Partition Allocation Mapping
+        </div>
+        <div style="display: flex; gap: 20px; font-size: 11px; color: var(--text-muted);">
+            <div>MOUNT POINT: <span style="color: var(--text-color);">/mnt/forensic_pool</span></div>
+            <div>USED SPACE: <span style="color: var(--accent-amber);">1.24 TB</span></div>
+            <div>AVAILABLE: <span style="color: var(--accent-blue);">2.76 TB</span></div>
+        </div>
+    </div>
+
+
+
+
+    <!-- MAIN APPLICATION WORKSPACE LAYOUT WRAPPER -->
+    <div class="master-box-layout">
+        
+        <!-- FOCUS NODE: INGESTION CONTROLLER DROP BOX -->
+        <div class="panel" style="background: var(--panel-bg); border: 1px solid var(--border-color); border-radius: 4px; padding: 15px;">
+            <h2>Evidence Ingestion Layer</h2>
+            <p style="color: var(--text-dim); font-size: 11px; margin-bottom: 15px; text-transform: uppercase;">
+                Staging target: ESP32 core flash bank arrays.
+            </p>
+            
+            <form id="ingestionForm" class="space-y-4">
+                <!-- Hidden physical path file selector -->
+                <input type="file" id="fileSelector" accept="image/*" class="hidden" onchange="processStagedArtifact(this)">
+                
+                <!-- Graphic execution click target block -->
+                <div class="drop-zone-chassis" onclick="document.getElementById('fileSelector').click()">
+                    <span style="color: var(--primary-glow); font-weight: bold; font-size: 11px; display: block; margin-bottom: 5px;">[ COMMENCE ARTIFACT SCAN ]</span>
+                    <span style="color: var(--text-dim); font-size: 10px; text-transform: uppercase;">Select or drop image metrics here</span>
+                </div>
+                
+                <!-- IMAGE PREVIEW AND METADATA TELEMETRY FIELDS Container -->
+                <div id="previewContainer" class="hidden" style="margin-top: 15px;">
+                    <div class="image-preview-frame">
+                        <img id="imageMock" src="" alt="Forensic Target Extraction Node Thumbnail">
+                    </div>
+                    
+                    <div style="margin-top: 12px; font-size: 11px; line-height: 1.5;">
+                        <div class="metric-group">
+                            <span class="metric-label">IDENTIFIER:</span>
+                            <span class="metric-value" id="metaName" style="color: var(--primary-glow); max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: bottom;">--</span>
+                        </div>
+                        <div class="metric-group">
+                            <span class="metric-label">CAPACITY:</span>
+                            <span class="metric-value" id="metaSize" style="color: var(--accent-blue);">-- KB</span>
+                        </div>
+                        <div class="metric-group">
+                            <span class="metric-label">SOURCE DEVICE:</span>
+                            <span class="metric-value" id="metaSourceDevice" style="color: var(--accent-amber);">DETECTING...</span>
+                        </div>
+                        <div class="metric-group">
+                            <span class="metric-label">TIMESTAMP:</span>
+                            <span class="metric-value" id="metaTimestamp" style="color: var(--text-color);">--</span>
+                        </div>
+                    </div>
+                    
+                    <button type="button" class="btn-submit" onclick="commitBlockToLedger()">
+                        Transmit Block Payload to Flash Partition
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- REVISED INTERACTIVE CASE PARTITION EXPLORER GRID GRID -->
+        <div class="ui-card" style="margin-bottom: 0;">
+            <div class="panel-heading">
+                <span>Case File Directory Node &amp; Logging Grid</span>
+                <span id="dvrIndicator" style="color: var(--secondary-glow); font-size: 11px; font-family: inherit;">● STORAGE POOL READ/WRITE MOUNTED</span>
+            </div>
+
+            <div class="storage-grid-layout">
+                <!-- DIRECTION COLUMN SELECTION LINKS -->
+                <div class="directory-tree-box">
+                    <div class="dir-node-item active" onclick="filterFileGridByFolder('all', this)">[Root Partition]</div>
+                    <div class="dir-node-item" onclick="filterFileGridByFolder('network', this)">↳ Packet Captures</div>
+                    <div class="dir-node-item" onclick="filterFileGridByFolder('biometric', this)">↳ Bio Telemetry Logs</div>
+                    <div class="dir-node-item" onclick="filterFileGridByFolder('legal', this)">↳ Signed Warrants</div>
+                </div>
+
+                <!-- INTERACTIVE FILE LISTING MATRIX LOG -->
+                <div style="background-color: rgba(2, 7, 15, 0.2); border: 1px solid var(--border-color); padding: 10px; overflow-y: auto; max-height: 420px;">
+                    <table class="data-table" id="fileTable">
+                        <thead>
+                            <tr>
+                                <th>File Allocation Name</th>
+                                <th>Byte Sizing</th>
+                                <th>Origin Source Mapping</th>
+                                <th>Ingestion Timestamp</th>
+                                <th>Directory Category</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr data-folder="network">
+                                <td style="color: var(--accent-blue); font-weight: bold;">packet_dump_ch6.pcap</td>
+                                <td>42.8 MB</td>
+                                <td>SOFTAP-PROV-04 (Chrome/Linux)</td>
+                                <td class="timestamp-cell">2026-07-25 15:30:12</td>
+                                <td><span class="badge-type" style="background: rgba(0,204,255,0.1); color: var(--accent-blue);">NETWORK</span></td>
+                            </tr>
+                            <tr data-folder="biometric">
+                                <td style="color: var(--accent-blue); font-weight: bold;">bio_session_8821.bin</td>
+                                <td>12.4 MB</td>
+                                <td>NEURAL-CORE-MESH (Embedded Node)</td>
+                                <td class="timestamp-cell">2026-07-25 15:45:00</td>
+                                <td><span class="badge-type" style="background: rgba(0,230,118,0.1); color: var(--secondary-glow);">BIOMETRIC</span></td>
+                            </tr>
+                            <tr data-folder="legal">
+                                <td style="color: var(--accent-blue); font-weight: bold;">warrant_sign_approved.sig</td>
+                                <td>4.2 KB</td>
+                                <td>LEGAL-MATRIX-OP (Terminal v2.1)</td>
+                                <td class="timestamp-cell">2026-07-25 16:02:44</td>
+                                <td><span class="badge-type" style="background: rgba(255,176,0,0.1); color: var(--accent-amber);">LEGAL</span></td>
+                            </tr>
+                            <tr data-folder="network">
+                                <td style="color: var(--accent-blue); font-weight: bold;">ap_handshake_traces.log</td>
+                                <td>842 KB</td>
+                                <td>SOFTAP-PROV-01 (Safari/iOS)</td>
+                                <td class="timestamp-cell">2026-07-25 16:10:19</td>
+                                <td><span class="badge-type" style="background: rgba(0,204,255,0.1); color: var(--accent-blue);">NETWORK</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        /**
+         * 1. PHYSICAL CAPTURE AND METADATA TELEMETRY HARVESTER
+         * Generates real-time information footprints based on user interactions
+         */
+        function processStagedArtifact(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // Read and stream raw image bytes into the container window
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imageMock').src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+
+                // Populate individual data metrics panels matching your screenshot layout
+                document.getElementById('metaName').innerText = file.name;
+                document.getElementById('metaSize').innerText = (file.size / 1024).toFixed(2) + " KB";
+                
+                // Ingest machine metadata from the incoming device signature string
+                document.getElementById('metaSourceDevice').innerText = parseClientDevicePlatform();
+                
+                // Formulate system time values
+                const currentDateTime = new Date();
+                const formattedTime = currentDateTime.toISOString().replace('T', ' ').substring(0, 19);
+                document.getElementById('metaTimestamp').innerText = formattedTime;
+
+                // Reveal preview panel
+                document.getElementById('previewContainer').classList.remove('hidden');
+            }
+        }
+
+        /**
+         * 2. DEVICE PLATFORM DECODING ENGINE
+         * Parses browser headers to identify the upload node source device type
+         */
+        function parseClientDevicePlatform() {
+            const agentString = navigator.userAgent;
+            let deviceNode = "GENERIC-WORKSTATION";
+            let browserLabel = "Unknown Engine";
+
+            // Identify base operating systems
+            if (agentString.indexOf("Win") !== -1) deviceNode = "SYS-WIN-NODE";
+            else if (agentString.indexOf("Mac") !== -1) deviceNode = "SYS-OSX-NODE";
+            else if (agentString.indexOf("Linux") !== -1) deviceNode = "SYS-LINUX-NODE";
+            else if (agentString.indexOf("Android") !== -1) deviceNode = "MOBILE-AND-NODE";
+            else if (agentString.indexOf("iPhone") !== -1 || agentString.indexOf("iPad") !== -1) deviceNode = "MOBILE-IOS-NODE";
+
+            // Identify engine browsers
+            if (agentString.indexOf("Chrome") !== -1) browserLabel = "Chrome";
+            else if (agentString.indexOf("Safari") !== -1 && agentString.indexOf("Chrome") === -1) browserLabel = "Safari";
+            else if (agentString.indexOf("Firefox") !== -1) browserLabel = "Firefox";
+            else if (agentString.indexOf("Edg") !== -1) browserLabel = "Edge";
+
+            return `${deviceNode} (${browserLabel})`;
+        }
+
+        /**
+         * 3. DIRECTORY TABLE ROW INJECTION PIPELINE
+         * Appends freshly ingested file rows directly into the dashboard ledger database
+         */
+        function commitBlockToLedger() {
+            const fileName = document.getElementById('metaName').innerText;
+            const fileSize = document.getElementById('metaSize').innerText;
+            const deviceSrc = document.getElementById('metaSourceDevice').innerText;
+            const timestamp = document.getElementById('metaTimestamp').innerText;
+            
+            // Access target file database matrix directly
+            const tableBody = document.querySelector('#fileTable tbody');
+            
+            // Build out structural table row parameters cleanly matching existing schema
+            const newRow = document.createElement('tr');
+            newRow.setAttribute('data-folder', 'network'); // Default new items onto root network matrix
+            
+            newRow.innerHTML = `
+                <td style="color: var(--accent-blue); font-weight: bold;">${fileName}</td>
+                <td>${fileSize}</td>
+                <td>${deviceSrc}</td>
+                <td class="timestamp-cell">${timestamp}</td>
+                <td><span class="badge-type" style="background: rgba(0,204,255,0.1); color: var(--accent-blue);">NETWORK</span></td>
+            `;
+
+            // Insert matching record at top of folder listing stack
+            tableBody.insertBefore(newRow, tableBody.firstChild);
+            
+            // Reset input container state elements
+            document.getElementById('previewContainer').classList.add('hidden');
+            document.getElementById('ingestionForm').reset();
+            
+            console.log(`[INGESTION SUCCESS] Core entry block securely mapped: ${fileName}`);
+        }
+
+        /**
+         * 4. DIRECTORY TREE SELECTION AND FILTER RULES
+         * Toggles data visibility parameters across rows matching requested category trees
+         */
+        function filterFileGridByFolder(folderCategory, clickedElement) {
+            // Update active menu tab indicator tracking markers
+            document.querySelectorAll('.dir-node-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            clickedElement.classList.add('active');
+
+            // Iterate rows masking non-matching file attributes entries
+            const tableRows = document.querySelectorAll('#fileTable tbody tr');
+            tableRows.forEach(row => {
+                const rowFolderContext = row.getAttribute('data-folder');
+                if (folderCategory === 'all' || rowFolderContext === folderCategory) {
+                    row.style.display = 'table-row';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Integrity verification mapping registration checks
+        if (parent && parent.CBOS_Core) {
+            console.log("Documents File Manager mounted to shell instance version: " + parent.CBOS_Core.version);
+        }
+    </script>
+</body>
+</html>
+
+
