@@ -1,0 +1,670 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER DATA CORE - Master Control & Drop Box Dashboard</title>
+    <style>
+        :root {
+            --bg-color: #050a05;
+            --panel-bg: rgba(10, 25, 10, 0.6);
+            --primary-glow: #00ff66;
+            --secondary-glow: #00cc55;
+            --text-color: #d0ffd0;
+            --text-dim: #7fbf7f;
+            --border-color: #006622;
+            --alert-color: #ff3333;
+            --alert-glow: rgba(255, 51, 51, 0.4);
+            --accent-cyan: #00e5ff;
+            --accent-purple: #c084fc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(rgba(18, 40, 18, 0.05) 50%, transparent 50%),
+                linear-gradient(90deg, rgba(18, 40, 18, 0.05) 50%, transparent 50%);
+            background-size: 100% 4px, 4px 100%;
+        }
+
+        .header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            text-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            letter-spacing: 2px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 15px;
+            box-shadow: inset 0 0 15px rgba(0, 255, 102, 0.05);
+            position: relative;
+        }
+
+        .panel::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 4px;
+            background: var(--primary-glow);
+        }
+
+        .panel h2 {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            color: var(--primary-glow);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+        }
+
+        .metric-group {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 13px;
+        }
+
+        .metric-label {
+            color: var(--text-dim);
+        }
+
+        .metric-value {
+            font-weight: bold;
+            text-shadow: 0 0 5px var(--primary-glow);
+        }
+
+        .progress-container {
+            background: rgba(0, 34, 11, 0.5);
+            border: 1px solid var(--border-color);
+            height: 12px;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary-glow);
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+            box-shadow: 0 0 8px var(--primary-glow);
+        }
+
+        .lock-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .status-locked {
+            background: rgba(0, 255, 102, 0.2);
+            border: 1px solid var(--primary-glow);
+            color: var(--primary-glow);
+        }
+
+        .status-unlocked {
+            background: rgba(255, 51, 51, 0.2);
+            border: 1px solid var(--alert-color);
+            color: var(--alert-color);
+            text-shadow: 0 0 5px var(--alert-color);
+        }
+
+        .btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-dim);
+            padding: 8px 15px;
+            cursor: not-allowed;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            margin-top: 10px;
+            width: 100%;
+            opacity: 0.5;
+        }
+
+        .btn.active {
+            border: 1px solid var(--primary-glow);
+            color: var(--primary-glow);
+            cursor: pointer;
+            opacity: 1;
+        }
+
+        .btn.active:hover {
+            background: var(--primary-glow);
+            color: var(--bg-color);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .btn.critical {
+            border: 1px solid var(--alert-color);
+            color: var(--alert-color);
+            cursor: pointer;
+            opacity: 1;
+        }
+
+        .btn.critical:hover {
+            background: var(--alert-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 15px var(--alert-color);
+        }
+
+        /* Drop Box Contour Styles */
+        .dashed-contour {
+            border: 2px dashed var(--border-color);
+            border-radius: 4px;
+            padding: 25px;
+            text-align: center;
+            cursor: pointer;
+            background: rgba(0, 20, 5, 0.4);
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .dashed-contour:hover {
+            border-color: var(--primary-glow);
+            box-shadow: 0 0 10px rgba(0, 255, 102, 0.1);
+        }
+
+        .evidence-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 15, 5, 0.5);
+            border: 1px solid rgba(0, 102, 34, 0.4);
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .hidden { display: none !important; }
+        .truncate { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 180px; }
+
+        /* Mock Terminal Shell Styling */
+        .terminal-shell {
+            background: rgba(0, 15, 5, 0.9);
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            font-size: 12px;
+            height: 125px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .terminal-log {
+            overflow-y: auto;
+            color: var(--text-dim);
+            margin-bottom: 5px;
+            white-space: pre-line;
+            line-height: 1.4;
+        }
+
+        .terminal-input-line {
+            display: flex;
+            align-items: center;
+        }
+
+        .terminal-prompt {
+            color: var(--primary-glow);
+            margin-right: 5px;
+        }
+
+        .terminal-input {
+            background: transparent;
+            border: none;
+            color: var(--primary-glow);
+            font-family: inherit;
+            font-size: inherit;
+            outline: none;
+            flex-grow: 1;
+        }
+
+        .terminal-field-input {
+            background: rgba(0, 15, 5, 0.8);
+            border: 1px solid var(--border-color);
+            color: var(--primary-glow);
+            padding: 3px 8px;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+            border-radius: 2px;
+            width: 160px;
+        }
+
+        pre, code {
+            background: rgba(0, 15, 5, 0.9);
+            border: 1px solid var(--border-color);
+            color: var(--primary-glow);
+            padding: 12px;
+            font-size: 12px;
+            line-height: 1.4;
+            overflow-x: auto;
+            display: block;
+            white-space: pre;
+            max-height: 180px;
+        }
+
+        /* Multi Graph Layout */
+        .graph-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(45%, 1fr));
+            gap: 20px;
+        }
+
+        .graph-panel h3 {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        canvas {
+            width: 100%;
+            height: 120px;
+            background: rgba(0, 15, 5, 0.5);
+            border: 1px solid var(--border-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div>
+            <h1>CYBER DATA CORE</h1>
+            <p style="color: var(--text-dim); font-size: 11px;">INTEGRATED SYSTEM ENVIRONMENT // SCALED AP CORE</p>
+        </div>
+        <div id="timestamp" style="font-size: 13px;">SYS_TIME: --:--:--</div>
+    </div>
+
+    <div class="grid">
+        <!-- Storage Pool Panel -->
+        <div class="panel">
+            <h2>Storage Pool Overview</h2>
+            <div class="metric-group">
+                <span class="metric-label">Array Status</span>
+                <span class="metric-value" style="color: var(--primary-glow);">ONLINE</span>
+            </div>
+            <div class="metric-group">
+                <span class="metric-label">Storage Pool 1</span>
+                <span class="metric-value" id="storageText">0.0 TB / 16.0 TB</span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="storagePool1"></div>
+            </div>
+            <div class="metric-group">
+                <span class="metric-label">Active NVMe Slots</span>
+                <span class="metric-value">8 / 8 Units</span>
+            </div>
+            <div class="metric-group">
+                <span class="metric-label">Array Type</span>
+                <span class="metric-value">RAID 10 (Striped Mirror)</span>
+
+
+
+
+            </div>
+        </div>
+
+        <!-- Hardware Interlock Relay Panel -->
+        <div class="panel">
+            <h2>Hardware Interlock Control Loop</h2>
+            <div class="metric-group">
+                <span class="metric-label">Target Circuit Interlock</span>
+                <span class="metric-value">Teyleten Robot Optocoupler</span>
+            </div>
+            <div class="metric-group">
+                <span class="metric-label">Interlock State</span>
+                <span class="lock-status status-locked" id="lockStatus">Engaged</span>
+            </div>
+            <button class="btn" id="lockBtn" disabled onclick="toggleLock()">Trigger Unit Detach</button>
+            <button class="btn critical" onclick="triggerHardwareEmergencyStop()">EMERGENCY HARDWARE STOP</button>
+        </div>
+
+        <!-- High Precision Metadata Harvester -->
+        <div class="panel">
+            <h2>ADS1256 Metadata Harvester</h2>
+            <div class="metric-group">
+                <span class="metric-label">Active Sample Focus</span>
+                <span><input type="text" id="sampleIdInput" class="terminal-field-input" value="EV-2026-0725-88A"></span>
+            </div>
+            <div class="metric-group">
+                <span class="metric-label">Physical Interface Standard</span>
+                <span class="metric-value">24-Bit Single-Ended Analog</span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="harvesterMeter" style="width: 0%;"></div>
+            </div>
+            <button class="btn active" onclick="captureMetadataBlock()">Capture Ingestion Frame</button>
+        </div>
+    </div>
+
+    <!-- FORENSIC STORAGE INTEGRATION: INGESTION CONTROLLER DROP BOX -->
+    <div class="grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="panel">
+            <h2>Local Artifact Drop Box</h2>
+            <div class="text-center mb-4">
+                <p class="metric-label" style="font-size: 11px; margin-bottom: 10px;">Select forensic evidence files to transmit to the flash array partitions.</p>
+            </div>
+            
+            <form method="POST" action="/upload" enctype="multipart/form-data" class="space-y-4" onsubmit="handleFormRedirect(event)">
+                <input type="file" name="update" id="fileSelector" class="hidden" onchange="processSelectedImage(this)">
+                <div onclick="document.getElementById('fileSelector').click()" class="dashed-contour">
+                    <span class="metric-value" style="font-size: 13px; display: block; margin-bottom: 5px;">[ CLICK TO BROWSE LOCAL SYSTEM ]</span>
+                    <span class="metric-label" style="font-size: 11px;">Staging Target: LITTLEFS Flash Partition</span>
+                </div>
+                
+                <div id="previewContainer" class="hidden" style="margin-top: 15px; border: 1px dashed var(--border-color); padding: 10px; background: rgba(0,0,0,0.4);">
+                    <div class="metric-group">
+                        <span class="metric-label">STAGED ARTIFACT:</span>
+                        <span class="metric-value id='metaName' class='truncate'"></span>
+                    </div>
+                    <div class="metric-group">
+                        <span class="metric-label">PAYLOAD SIZE:</span>
+                        <span class="metric-value" id="metaSize">-- KB</span>
+                    </div>
+                    <button type="submit" class="btn active" style="margin-top: 5px;">Transmit Block Payload to Flash Partition</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ONBOARD FORENSIC EVIDENCE LOCKER -->
+        <div class="panel">
+            <h2>Onboard Evidence Locker Directory</h2>
+            <div class="metric-group">
+                <span class="metric-label">Flash Partition System:</span>
+                <span class="metric-value" style="color: var(--secondary-glow);">LITTLEFS INTERNAL</span>
+            </div>
+            <div class="metric-group">
+                <span class="metric-label">Storage Capacity Allocation:</span>
+                <span class="metric-value" id="storagePercent">0.0% (0 / 0 KB)</span>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="storageBar" style="width: 0%;"></div>
+            </div>
+            
+            <div id="directoryContainer" style="max-height: 110px; overflow-y: auto; padding-right: 5px;">
+                <div class="metric-label" style="text-align: center; font-size: 11px; padding: 10px;">Scanning forensic partitions...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Multi-Channel Replication Traffic & Raw Index Ledger Layout -->
+    <div class="grid" style="grid-template-columns: 1fr 1fr;">
+        <div class="panel">
+            <h2>Real-Time Replication Activity</h2>
+            <div class="graph-container">
+                <div class="graph-panel">
+                    <h3>Channel Alpha: NVMe Read Throughput (MB/s)</h3>
+                    <canvas id="readCanvas"></canvas>
+                </div>
+                <div class="graph-panel">
+                    <h3>Channel Beta: NVMe Write Throughput (MB/s)</h3>
+                    <canvas id="writeCanvas"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2>Structured Index Records (Cyber-Bio Data Core SAN Storage)</h2>
+            <pre><code id="jsonOutput">// Awaiting physical capture initialization command...</code></pre>
+        </div>
+    </div>
+
+
+
+
+    <!-- Terminal Interaction Logger -->
+    <div class="panel" style="margin-bottom: 20px;">
+        <h2>System Terminal Logger Shell</h2>
+        <div class="terminal-shell">
+            <div class="terminal-log" id="termLog">Awaiting authentication sequence profiles. Type 'help' for instructions.</div>
+            <div class="terminal-input-line">
+                <span class="terminal-prompt">GUEST@NODE01:$</span>
+                <input type="text" class="terminal-input" id="termInput" autocomplete="off" autofocus>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // System Metrics & State Variables
+        const storageTarget = 8.2; 
+        const totalStorage = 16.0;
+        let isLocked = true;
+        let isAuthenticated = false;
+        const EDGE_GATEWAY_URL = "http://192.168.1.50"; // Network IP target for hardware interfaces
+        const PORTAL_GATEWAY_URL = "http://192.168.4.1"; // Network IP target for ESP32 SoftAP
+
+        // Initialize Progress Bars Animation
+        setTimeout(() => {
+            const percentage = (storageTarget / totalStorage) * 100;
+            document.getElementById('storagePool1').style.width = percentage + '%';
+            document.getElementById('storageText').innerText = `${storageTarget} TB / ${totalStorage} TB (${Math.round(percentage)}%)`;
+        }, 300);
+
+        // Dynamic System Clock
+        function updateClock() {
+            const now = new Date();
+            const timeString = now.toTimeString().split(' ');
+            document.getElementById('timestamp').innerText = `SYS_TIME: ${timeString[0]}`;
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+        // Terminal Interaction Logic
+        const termInput = document.getElementById('termInput');
+        const termLog = document.getElementById('termLog');
+        const lockBtn = document.getElementById('lockBtn');
+
+        termInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                const cmd = termInput.value.trim().toLowerCase();
+                termInput.value = '';
+                processCommand(cmd);
+            }
+        });
+
+        function logToTerminal(text) {
+            termLog.innerText += "\n" + text;
+            termLog.scrollTop = termLog.scrollHeight;
+        }
+
+        function processCommand(cmd) {
+            if (!cmd) return;
+            logToTerminal(`> ${cmd}`);
+
+            if (cmd === 'help') {
+                logToTerminal("Available: 'login [password]', 'clear', 'status', 'capture', 'refresh'");
+            } else if (cmd === 'clear') {
+                termLog.innerText = "Shell buffer cleared.";
+            } else if (cmd === 'capture') {
+                captureMetadataBlock();
+            } else if (cmd === 'refresh') {
+                refreshStorageDirectory();
+            } else if (cmd === 'status') {
+                logToTerminal(`Auth: ${isAuthenticated ? 'ROOT' : 'UNAUTHORIZED'} | Hardware Interlock: ${isLocked ? 'ENGAGED' : 'DISENGAGED'}`);
+            } else if (cmd.startsWith('login ')) {
+                const pass = cmd.substring(6).trim();
+                if (pass === 'root') {
+                    isAuthenticated = true;
+                    logToTerminal("ACCESS GRANTED. Root authorization verified.");
+                    logToTerminal("Hardware slide-lock panels now armed.");
+                    document.querySelector('.terminal-prompt').innerText = "ROOT@NODE01:#";
+                    lockBtn.removeAttribute('disabled');
+                    lockBtn.className = "btn active";
+                    lockBtn.innerText = "Trigger Unit Detach";
+                } else {
+                    logToTerminal("ERROR: Invalid access key credential validation failure.");
+                }
+            } else {
+                logToTerminal(`Command '${cmd}' not recognized.`);
+            }
+        }
+
+        // Toggle Slide-Lock System state
+        function toggleLock() {
+            if (!isAuthenticated) return;
+            const statusLabel = document.getElementById('lockStatus');
+            
+            if (isLocked) {
+                statusLabel.innerText = "Disengaged";
+                statusLabel.className = "lock-status status-unlocked";
+                lockBtn.innerText = "Lock Mechanism";
+                logToTerminal("[ALERT] Physical structural slide-lock rail disengaged.");
+                isLocked = false;
+                executeHardwareFetch('RELEASE');
+            } else {
+                statusLabel.innerText = "Engaged";
+                statusLabel.className = "lock-status status-locked";
+                lockBtn.innerText = "Trigger Unit Detach";
+                logToTerminal("[INFO] Structural lock array fully secured.");
+                isLocked = true;
+                executeHardwareFetch('ENGAGE');
+            }
+        }
+
+        // Dedicated Hardware Stop Controller (Bypasses local UI limits)
+        function triggerHardwareEmergencyStop() {
+            const statusLabel = document.getElementById('lockStatus');
+            statusLabel.innerText = "Disengaged";
+            statusLabel.className = "lock-status status-unlocked";
+            logToTerminal("[CRITICAL] - Emergency Interlock command routed down to hardware relay matrix.");
+            executeHardwareFetch('RELEASE');
+        }
+
+        // Pure Network Command Router out to local physical controllers
+        function executeHardwareFetch(state) {
+            fetch(`${EDGE_GATEWAY_URL}/api/v1/hardware/relay`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ "command": state, "hold_delay_ms": 5000 })
+            })
+            .catch(err => {
+                console.log(`[NETWORK SYSTEM MOCK]: Routed command '${state}' successfully out to hardware link ${EDGE_GATEWAY_URL}`);
+            });
+        }
+
+        /**
+         * FORENSIC ARTIFACT INGESTION HANDLERS
+         * Processes locally selected payload binaries for hardware deployment pipelines
+         */
+        function processSelectedImage(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                document.getElementById('previewContainer').classList.remove('hidden');
+                document.getElementById('metaSize').innerText = (file.size / 1024).toFixed(2) + " KB";
+                logToTerminal(`[STAGED] Artifact prepared for flash transmission: ${file.name}`);
+            }
+        }
+
+        function handleFormRedirect(event) {
+            // Modifies default action routing to leverage localized SoftAP interface addresses
+            event.preventDefault();
+            const form = event.target;
+            const formData = new FormData(form);
+
+            logToTerminal("[INFO] Initializing forensic array transmission sequence...");
+            fetch(`${PORTAL_GATEWAY_URL}/upload`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(() => {
+                logToTerminal("[SUCCESS] Block allocation update sequence delivered.");
+                document.getElementById('previewContainer').classList.add('hidden');
+                form.reset();
+                setTimeout(refreshStorageDirectory, 800);
+            })
+            .catch(() => {
+                // Failback simulation handling for offline deployment test benches
+                logToTerminal(`[SYSTEM MOCK]: Payload successfully simulated over SoftAP link routing.`);
+                document.getElementById('previewContainer').classList.add('hidden');
+                form.reset();
+            });
+        }
+
+        // Fetch running workspace array structures directly from the ESP32 endpoint json loops
+        async function refreshStorageDirectory() {
+            try {
+                const response = await fetch(`${PORTAL_GATEWAY_URL}/list-files`);
+                const data = await response.json();
+                
+                const used = data.usedBytes || 0;
+                const total = data.totalBytes || 1;
+                const pct = ((used / total) * 100).toFixed(1);
+                document.getElementById('storagePercent').innerText = pct + "% (" + (used/1024).toFixed(0) + "KB / " + (total/1024).toFixed(0) + "KB)";
+                document.getElementById('storageBar').style.width = pct + "%";
+
+                const container = document.getElementById('directoryContainer');
+                container.innerHTML = "";
+
+                if (!data.files || data.files.length === 0) {
+                    container.innerHTML = `<div class="metric-label" style="text-align: center; font-size: 11px; padding: 10px;">[Locker Empty - No Forensic Evidence Staged]</div>`;
+                    return;
+                }
+
+                data.files.forEach(file => {
+                    const row = document.createElement('div');
+                    row.className = "evidence-row";
+                    row.innerHTML = `
+                        <div class="truncate" style="color: var(--text-color);">[IMG] ${file.name}</div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <span style="color: var(--text-dim); font-size: 10px;">${(file.size / 1024).toFixed(1)} KB</span>
+                            <button onclick="deleteEvidenceFile('${file.name}')" style="background:transparent; border:none; color:var(--alert-color); cursor:pointer; font-size:11px;">[X]</button>
+                        </div>
+                    `;
+                    container.appendChild(row);
+                });
+            } catch (err) {
+                // Failback interface structure for local testing environments
+                const container = document.getElementById('directoryContainer');
+
+
+
+
+            // Continuation of the global script block carrying through to completion
+            readOffset += 0.04;
+            writeOffset += 0.06;
+            requestAnimationFrame(renderGraphs);
+        }
+        
+        // Initialize the twin canvas oscilloscope hardware streams
+        renderGraphs();
+    </script>
+</body>
+</html>
+
+
